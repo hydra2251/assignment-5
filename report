@@ -1,0 +1,35 @@
+
+Certainly! Below is a sample report that you can use as a template. Please note that you should replace the placeholder text with your actual findings, observations, and results.
+
+Parallel Counting Ones Program - Performance Analysis
+Introduction
+The goal of this experiment was to implement a parallel version of a program that counts and prints the total number of ones in an array of integers. The sequential implementation was provided as a reference, and parallel versions were developed to explore different synchronization mechanisms and performance optimizations.
+
+Experimental Setup
+Code Versions
+Race Condition (count_race.c): A basic parallel implementation without proper synchronization, allowing for race conditions.
+Mutex (count_mutex.c): Introduced a mutex to protect the critical section, preventing race conditions.
+Private Counts (count_private.c): Used private variables for each thread to avoid the need for mutexes.
+Padding Caches (count_cache.c): Padded data structures to minimize false sharing in caches.
+Parameters
+Array Sizes: 1,000, 1,000,000, and 1,000,000,000 integers
+Number of Threads: 1, 2, 4, and 32
+Results and Analysis
+Race Condition
+The race condition version exhibited inconsistent results due to concurrent updates to the shared count variable. On running the program 100 times, the correct answer was obtained only a fraction of the time. This underscores the importance of proper synchronization in parallel programming.
+
+Mutex
+Introducing a mutex significantly improved the correctness of the program. The execution times increased with the number of threads, but the results were consistently correct. However, the performance gain was not optimal due to contention for the mutex.
+
+Private Counts
+The private counts version, which avoided mutexes, demonstrated improved performance compared to the mutex version. The program produced correct results, and the execution times decreased as expected with an increase in the number of threads.
+
+Padding Caches
+Padding the data structures to avoid false sharing in caches was expected to further improve performance. However, the impact was minimal, and in some cases, there was no significant improvement. This suggests that other factors, such as memory access patterns, might be more critical in this context.
+
+Conclusion
+In conclusion, proper synchronization is crucial in parallel programming to ensure correct results. While mutexes provide correctness, they introduce contention, impacting performance. Private variables offer a performance improvement, and padding caches, while theoretically beneficial, may not always yield significant gains.
+
+Further optimizations and considerations, such as optimizing memory access patterns, could be explored in future work. Overall, the choice of synchronization mechanism and optimizations should be carefully considered based on the specific characteristics of the problem and the target hardware.
+
+Feel free to customize this report based on your actual findings and observations. If you have specific data to include or additional aspects to discuss, feel free to add or modify the content accordingly.
