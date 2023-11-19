@@ -1,0 +1,76 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <sys/time.h>
+
+#define ARRAY_SIZE 1000000
+int *array;
+int length;
+int count = 0;
+int num_threads;
+pthread_mutex_t count_mutex;
+
+void *count1s(void *arg) {
+    int thread_id = *((int *)arg);
+    int chunk_size = length / num_threads;
+    int start = thread_id * chunk_size;
+    int end = (thread_id == num_threads - 1) ? length : start + chunk_size;
+
+    for (int i = start; i < end; i++) {
+        if (array[i] == 1) {
+            pthread_mutex_lock(&count_mutex);
+            count++;
+            pthread_mutex_unlock(&count_mutex);
+        }
+    }
+
+    pthread_exit(NULL);
+}
+
+double getExecutionTime(struct timeval start, struct timeval end) {
+    return (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1e6;
+}
+
+int main(int argc, char *argv[]) {
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s <num_threads>\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+
+    num_threads = atoi(argv[1]);
+    length = ARRAY_SIZE;
+
+    array = (int *)malloc(length * sizeof(int));
+    srand(time(NULL));
+    for (int i = 0; i < length; i++) {
+        array[i] = rand() % 6; // Values between 0 and 5 (inclusive)
+    }
+
+    pthread_t threads[num_threads];
+    int thread_ids[num_threads];
+
+    struct timeval start, end;
+    gettimeofday(&start, NULL);
+
+    pthread_mutex_init(&count_mutex, NULL);
+
+    for (int i = 0; i < num_threads; i++) {
+        thread_ids[i] = i;
+        pthread_create(&threads[i], NULL, count1s, (void *)&thread_ids[i]);
+    }
+
+    for (int i = 0; i < num_threads; i++) {
+        pthread_join(threads[i], NULL);
+    }
+
+    pthread_mutex_destroy(&count_mutex);
+
+    gettimeofday(&end, NULL);
+
+    printf("Number of ones: %d\n", count);
+    printf("Execution time: %f seconds\n", getExecutionTime(start, end));
+
+    free(array);
+
+    return 0;
+}
